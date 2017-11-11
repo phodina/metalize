@@ -3,7 +3,7 @@ use libc::{c_char, uint32_t, uint8_t, size_t};
 use std::ffi::{CString, CStr};
 use std::iter;
 use std::slice;
-
+use std::convert::From;
 
 #[no_mangle]
 pub extern fn addition(a: uint32_t, b: uint32_t) -> uint32_t {
@@ -53,6 +53,35 @@ pub extern fn sum(n: *const uint32_t, len: size_t) -> uint32_t {
         numbers.iter()
         .fold(0, |acc, v| acc + v);
     sum as uint32_t
+}
+
+// A struct that can be passed between C and Rust
+#[repr(C)]
+pub struct Tuple {
+    x: uint32_t,
+    y: uint32_t,
+}
+// Conversion functions
+impl From<(u32, u32)> for Tuple {
+    fn from(tup: (u32, u32)) -> Tuple {
+        Tuple { x: tup.0, y: tup.1 }
+    }
+}
+
+impl From<Tuple> for (u32, u32) {
+    fn from(tup: Tuple) -> (u32, u32) {
+        (tup.x, tup.y)
+    }
+}
+
+#[no_mangle]
+pub extern fn swap_point_values(tup: Tuple) -> Tuple {
+    point_swap(tup.into()).into()
+}
+
+fn point_swap(point: (u32, u32)) -> (u32, u32) {
+    let (a, b) = point;
+    (b+1, a-1)
 }
 
 #[allow(dead_code)]
