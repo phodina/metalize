@@ -8,4 +8,5 @@ clean:
 	rm -f ./bin/*
 build:
 	$(CARGO_BIN) build --release
-	$(GCC_BIN) -fsanitize=address -o ./bin/addition ./examples/addition.c -L. -l:target/release/libmetalize.a
+	$(GCC_BIN) -fsanitize=address -o ./bin/addition ./examples/addition.c -L. -l:target/release/libmetalize.a -ldl -lpthread
+	$(GCC_BIN) -fsanitize=address -o ./bin/count_characters ./examples/count_characters.c -L. -l:target/release/libmetalize.a -ldl -lpthread
