@@ -13,3 +13,4 @@ build:
 	$(GCC_BIN) -fsanitize=address -o ./bin/quotes ./examples/quotes.c -L. -l:target/release/libmetalize.a -ldl -lpthread
 	$(GCC_BIN) -fsanitize=address -o ./bin/sum ./examples/sum.c -L. -l:target/release/libmetalize.a -ldl -lpthread
 	$(GCC_BIN) -fsanitize=address -o ./bin/point ./examples/point.c -L. -l:target/release/libmetalize.a -ldl -lpthread
+	$(GCC_BIN) -fsanitize=address -o ./bin/accounts ./examples/accounts.c -L. -l:target/release/libmetalize.a -ldl -lpthread

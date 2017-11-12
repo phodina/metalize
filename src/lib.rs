@@ -3,6 +3,7 @@ use libc::{c_char, uint32_t, uint8_t, size_t};
 use std::ffi::{CString, CStr};
 use std::iter;
 use std::slice;
+use std::collections::HashMap;
 use std::convert::From;
 
 #[no_mangle]
@@ -82,6 +83,63 @@ pub extern fn swap_point_values(tup: Tuple) -> Tuple {
 fn point_swap(point: (u32, u32)) -> (u32, u32) {
     let (a, b) = point;
     (b+1, a-1)
+}
+
+pub struct AccountDatabase {
+    money: HashMap<String, u32>,
+}
+
+impl AccountDatabase {
+    fn new() -> AccountDatabase {
+        AccountDatabase {
+            money: HashMap::new(),
+        }
+    }
+
+    fn populate(&mut self) {
+        for i in 0..100000 {
+            let id = format!("{:05}", i);
+            self.money.insert(id, 100000 - i);
+        }
+    }
+
+    fn current_balance(&self, id: &str) -> u32 {
+        self.money.get(id).cloned().unwrap_or(0)
+    }
+}
+
+#[no_mangle]
+pub extern fn account_database_new() -> *mut AccountDatabase {
+    Box::into_raw(Box::new(AccountDatabase::new()))
+}
+
+#[no_mangle]
+pub extern fn account_database_free(ptr: *mut AccountDatabase) {
+    if ptr.is_null() { return }
+    unsafe { Box::from_raw(ptr); }
+}
+
+#[no_mangle]
+pub extern fn account_database_populate(ptr: *mut AccountDatabase) {
+    let database = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    database.populate();
+}
+
+#[no_mangle]
+pub extern fn account_database_current_balance(ptr: *const AccountDatabase, id: *const c_char) -> uint32_t {
+    let database = unsafe {
+        assert!(!ptr.is_null());
+        &*ptr
+    };
+    let id = unsafe {
+        assert!(!id.is_null());
+        CStr::from_ptr(id)
+    };
+    let id_str = id.to_str().unwrap();
+    database.current_balance(id_str)
 }
 
 #[allow(dead_code)]
