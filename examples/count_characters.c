@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-extern uint32_t count_characters(const char *str);
+#include "count_characters.h"
 
 int main(int argc, char const *argv[])
 {

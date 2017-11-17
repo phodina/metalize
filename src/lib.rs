@@ -1,5 +1,5 @@
 extern crate libc;
-use libc::{c_char, uint32_t, uint8_t, size_t};
+use libc::{uint32_t, uint8_t, size_t};
 use std::ffi::{CString, CStr};
 use std::iter;
 use std::slice;
@@ -11,6 +11,7 @@ pub use count_characters::*;
 pub use quotes::*;
 pub use sum::*;
 pub use point::*;
+pub use accounts::*;
 
 pub mod addition {
 
@@ -25,7 +26,7 @@ pub mod count_characters {
 
     use super::*;
     #[no_mangle]
-    pub extern fn count_characters(s: *const c_char) -> uint32_t {
+    pub extern fn count_characters(s: *const libc::c_char) -> uint32_t {
         let c_str = unsafe {
             assert!(!s.is_null());
 
@@ -41,7 +42,7 @@ pub mod quotes {
     
     use super::*;
     #[no_mangle]
-    pub extern fn create_new_quote(length: uint8_t) -> *mut c_char {
+    pub extern fn create_new_quote(length: uint8_t) -> *mut libc::c_char {
         let mut quote = String::from("💣 ");
         quote.extend(iter::repeat("Because I'm Batman!").take(length as usize));
         quote.push_str(" ka bum 💣");
@@ -51,7 +52,7 @@ pub mod quotes {
     }
 
     #[no_mangle]
-    pub extern fn free_quote(s: *mut c_char) {
+    pub extern fn free_quote(s: *mut libc::c_char) {
         unsafe {
             if s.is_null() { return }
             CString::from_raw(s)
@@ -108,15 +109,22 @@ pub mod point {
         let (a, b) = point;
         (b+1, a-1)
     }
+}
+
+pub mod accounts {
+
+    use super::*;
 
     pub struct AccountDatabase {
         money: HashMap<String, u32>,
     }
 
+    #[repr(C)]
+    pub struct AccountDB(AccountDatabase);
+
     impl AccountDatabase {
         fn new() -> AccountDatabase {
-            AccountDatabase {
-                money: HashMap::new(),
+            AccountDatabase {money: HashMap::new()
             }
         }
 
@@ -133,27 +141,27 @@ pub mod point {
     }
 
     #[no_mangle]
-    pub extern fn account_database_new() -> *mut AccountDatabase {
-        Box::into_raw(Box::new(AccountDatabase::new()))
+    pub extern fn account_database_new() -> *mut AccountDB {
+        Box::into_raw(Box::new(AccountDB(AccountDatabase::new())))
     }
 
     #[no_mangle]
-    pub extern fn account_database_free(ptr: *mut AccountDatabase) {
+    pub extern fn account_database_free(ptr: *mut AccountDB) {
         if ptr.is_null() { return }
         unsafe { Box::from_raw(ptr); }
     }
 
     #[no_mangle]
-    pub extern fn account_database_populate(ptr: *mut AccountDatabase) {
+    pub extern fn account_database_populate(ptr: *mut AccountDB) {
         let database = unsafe {
             assert!(!ptr.is_null());
             &mut *ptr
         };
-        database.populate();
+        database.0.populate();
     }
 
     #[no_mangle]
-    pub extern fn account_database_current_balance(ptr: *const AccountDatabase, id: *const c_char) -> uint32_t {
+    pub extern fn account_database_current_balance(ptr: *const AccountDB, id: *const libc::c_char) -> uint32_t {
         let database = unsafe {
             assert!(!ptr.is_null());
             &*ptr
@@ -163,7 +171,7 @@ pub mod point {
             CStr::from_ptr(id)
         };
         let id_str = id.to_str().unwrap();
-        database.current_balance(id_str)
+        database.0.current_balance(id_str)
     }
 }
 #[allow(dead_code)]

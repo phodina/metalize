@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-extern char *create_new_quote(uint8_t length);
-
-extern void free_quote(char *);
+#include "quotes.h"
 
 int main(void) {
 

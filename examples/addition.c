@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-extern uint32_t addition(uint32_t, uint32_t);
+#include "addition.h"
 
 int main(int argc, char const *argv[])
 {

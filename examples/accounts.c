@@ -1,22 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
 
-typedef struct account_database_S account_database_t;
-
-extern account_database_t *
-account_database_new(void);
-
-extern void
-account_database_free(account_database_t *);
-
-extern void
-account_database_populate(account_database_t *);
-
-extern uint32_t
-account_database_current_balance(const account_database_t *, const char *zip);
+#include "accounts.h"
 
 int main(void) {
-  account_database_t *database = account_database_new();
+  AccountDB *database = account_database_new();
 
   char *user1 = "90210";
   char *user2 = "20500";
